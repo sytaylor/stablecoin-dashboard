@@ -117,6 +117,7 @@ export default function DashboardPage() {
           format="currency"
           icon={<Coins className="h-5 w-5" />}
           loading={metricsLoading}
+          tooltip="Total circulating supply of all tracked stablecoins across all chains. Source: DefiLlama stablecoins API, updated every 5 minutes."
         />
         <MetricCard
           title="24h Transfer Volume"
@@ -124,6 +125,8 @@ export default function DashboardPage() {
           format="currency"
           icon={<Activity className="h-5 w-5" />}
           loading={volumeLoading || duneLoading || bridgeLoading}
+          subtitle="Raw on-chain volume"
+          tooltip="Total stablecoin transfer volume in the last 24 hours. Includes all on-chain activity: CEX flows, DEX trades, bridges, payments, and bot activity. This is the 'unadjusted' figure."
         />
         <MetricCard
           title="Payments Volume"
@@ -131,8 +134,8 @@ export default function DashboardPage() {
           format="currency"
           icon={<CreditCard className="h-5 w-5" />}
           loading={volumeLoading || duneLoading || bridgeLoading || adjustedLoading}
-          subtitle="Excl. CEX, DEX & bridges"
-          tooltip="Methodology: Excludes CEX deposits/withdrawals (Binance, Coinbase, etc.), DEX router activity (Uniswap, Curve), bridge transfers, and high-frequency addresses (>1000 tx/30d). Based on Visa/Allium & Artemis research showing ~38% of raw volume is actual payments."
+          subtitle="~38% of raw (estimate)"
+          tooltip="Estimated real payment activity excluding: CEX deposits/withdrawals, DEX swaps, bridge transfers, MEV bots, and high-frequency traders. Based on Visa/Allium & Artemis 2025 research. Actual % varies by chain and stablecoin."
         />
         <MetricCard
           title="Daily Active Addresses"
@@ -140,6 +143,7 @@ export default function DashboardPage() {
           format="number"
           icon={<Users className="h-5 w-5" />}
           loading={duneLoading}
+          tooltip="Unique addresses that sent or received stablecoins in the last 24 hours. Counts each address once regardless of transaction count. Source: Dune Analytics."
         />
       </MetricCardGrid>
 
