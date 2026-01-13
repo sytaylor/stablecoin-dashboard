@@ -68,6 +68,10 @@ export default function DashboardPage() {
 
   // Payments volume: excludes CEX, DEX, bridges (Visa/Allium + Artemis methodology)
   const paymentsVolume = adjustedData?.paymentsVolume || totalTransferVolume * 0.38
+  const volumeSource = adjustedData?.source || 'estimated'
+  const paymentsPercentage = totalTransferVolume > 0
+    ? ((paymentsVolume / totalTransferVolume) * 100).toFixed(0)
+    : '38'
 
   return (
     <div className="space-y-6">
@@ -134,8 +138,11 @@ export default function DashboardPage() {
           format="currency"
           icon={<CreditCard className="h-5 w-5" />}
           loading={volumeLoading || duneLoading || bridgeLoading || adjustedLoading}
-          subtitle="~38% of raw (estimate)"
-          tooltip="Estimated real payment activity excluding: CEX deposits/withdrawals, DEX swaps, bridge transfers, MEV bots, and high-frequency traders. Based on Visa/Allium & Artemis 2025 research. Actual % varies by chain and stablecoin."
+          subtitle={`~${paymentsPercentage}% of raw${volumeSource === 'artemis' ? '' : ' (est.)'}`}
+          tooltip={volumeSource === 'artemis'
+            ? "Artemis labeled wallet data: excludes CEX internal transfers, DEX activity, MEV bots. P2P + B2B transfers classified as payments."
+            : "Estimated based on Visa/Allium & Artemis 2025 research. Add ARTEMIS_API_KEY for real labeled data. Actual % varies by chain and stablecoin."
+          }
         />
         <MetricCard
           title="Daily Active Addresses"

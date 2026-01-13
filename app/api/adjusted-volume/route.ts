@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const metrics = calculateAdjustedVolume(rawVolume)
+    // calculateAdjustedVolume automatically uses Artemis API if ARTEMIS_API_KEY is set
+    const metrics = await calculateAdjustedVolume(rawVolume)
     return NextResponse.json(metrics)
   } catch (error) {
     console.error('Error calculating adjusted volume:', error)

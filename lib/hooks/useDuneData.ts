@@ -113,11 +113,13 @@ export interface AdjustedVolumeData {
   rawVolume: number
   adjustedVolume: number
   paymentsVolume: number
+  p2pVolume: number
   breakdown: {
     category: string
     volume: number
     percentage: number
   }[]
+  source: 'artemis' | 'estimated'
   methodology: string
   lastUpdated: string
 }
