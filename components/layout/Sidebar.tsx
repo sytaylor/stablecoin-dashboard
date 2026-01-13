@@ -27,7 +27,7 @@ const navigation = [
   { name: 'Overview', href: '/', icon: LayoutDashboard, description: 'Executive summary' },
   { name: 'Market', href: '/stablecoins', icon: TrendingUp, description: 'Supply & dominance' },
   { name: 'Activity', href: '/activity', icon: Activity, description: 'Volume & addresses' },
-  { name: 'Flows', href: '/bridges', icon: GitBranch, description: 'Cross-chain bridges' },
+  { name: 'Bridge Activity', href: '/bridges', icon: GitBranch, description: 'Cross-chain flows' },
   { name: 'Risk', href: '/risk', icon: Shield, description: 'Peg & concentration' },
   { name: 'Whale Watch', href: '/whales', icon: Fish, description: 'Large transfers' },
 ]

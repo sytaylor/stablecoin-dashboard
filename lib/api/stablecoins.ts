@@ -1,7 +1,7 @@
 import { getStablecoins, getStablecoin, getStablecoinChains, getStablecoinCharts } from './defillama'
 import type { StablecoinWithMetrics, ChainWithMetrics, StablecoinHistorical } from '../types'
 
-// The actual API response structure
+// The actual API response structure - circulating values are keyed by peg type
 interface ApiStablecoin {
   id: number
   name: string
@@ -9,36 +9,44 @@ interface ApiStablecoin {
   gecko_id: string | null
   pegType: string
   pegMechanism: string
-  circulating: { peggedUSD?: number }
-  circulatingPrevDay: { peggedUSD?: number }
-  circulatingPrevWeek: { peggedUSD?: number }
-  circulatingPrevMonth: { peggedUSD?: number }
+  circulating: Record<string, number>
+  circulatingPrevDay: Record<string, number>
+  circulatingPrevWeek: Record<string, number>
+  circulatingPrevMonth: Record<string, number>
   chainCirculating: {
     [chain: string]: {
-      current: { peggedUSD?: number }
-      circulatingPrevDay?: { peggedUSD?: number }
-      circulatingPrevWeek?: { peggedUSD?: number }
-      circulatingPrevMonth?: { peggedUSD?: number }
+      current: Record<string, number>
+      circulatingPrevDay?: Record<string, number>
+      circulatingPrevWeek?: Record<string, number>
+      circulatingPrevMonth?: Record<string, number>
     }
   }
   chains: string[]
   price: number | null
 }
 
+// Helper to get the circulating value regardless of peg type
+function getCirculatingValue(obj: Record<string, number> | undefined): number {
+  if (!obj) return 0
+  // Get the first (and usually only) value from the object
+  const values = Object.values(obj)
+  return values[0] || 0
+}
+
 export async function fetchAllStablecoins(): Promise<StablecoinWithMetrics[]> {
   const data = await getStablecoins(true)
   const peggedAssets: ApiStablecoin[] = data.peggedAssets || []
 
-  // Calculate total market cap for dominance
+  // Calculate total market cap for dominance (using helper for all peg types)
   const totalMarketCap = peggedAssets.reduce((sum, coin) => {
-    return sum + (coin.circulating?.peggedUSD || 0)
+    return sum + getCirculatingValue(coin.circulating)
   }, 0)
 
   return peggedAssets.map(coin => {
-    const totalCirculating = coin.circulating?.peggedUSD || 0
-    const totalPrevDay = coin.circulatingPrevDay?.peggedUSD || totalCirculating
-    const totalPrevWeek = coin.circulatingPrevWeek?.peggedUSD || totalCirculating
-    const totalPrevMonth = coin.circulatingPrevMonth?.peggedUSD || totalCirculating
+    const totalCirculating = getCirculatingValue(coin.circulating)
+    const totalPrevDay = getCirculatingValue(coin.circulatingPrevDay) || totalCirculating
+    const totalPrevWeek = getCirculatingValue(coin.circulatingPrevWeek) || totalCirculating
+    const totalPrevMonth = getCirculatingValue(coin.circulatingPrevMonth) || totalCirculating
 
     const change24h = totalPrevDay > 0 ? ((totalCirculating - totalPrevDay) / totalPrevDay) * 100 : 0
     const change7d = totalPrevWeek > 0 ? ((totalCirculating - totalPrevWeek) / totalPrevWeek) * 100 : 0
@@ -48,12 +56,15 @@ export async function fetchAllStablecoins(): Promise<StablecoinWithMetrics[]> {
     // Convert chainCirculating to our expected format
     const circulating: { [chain: string]: { current: number; circulatingPrevDay?: number; circulatingPrevWeek?: number; circulatingPrevMonth?: number } } = {}
     if (coin.chainCirculating) {
-      Object.entries(coin.chainCirculating).forEach(([chain, data]) => {
-        circulating[chain] = {
-          current: data.current?.peggedUSD || 0,
-          circulatingPrevDay: data.circulatingPrevDay?.peggedUSD,
-          circulatingPrevWeek: data.circulatingPrevWeek?.peggedUSD,
-          circulatingPrevMonth: data.circulatingPrevMonth?.peggedUSD,
+      Object.entries(coin.chainCirculating).forEach(([chain, chainData]) => {
+        const current = getCirculatingValue(chainData.current)
+        if (current > 0) {
+          circulating[chain] = {
+            current,
+            circulatingPrevDay: getCirculatingValue(chainData.circulatingPrevDay),
+            circulatingPrevWeek: getCirculatingValue(chainData.circulatingPrevWeek),
+            circulatingPrevMonth: getCirculatingValue(chainData.circulatingPrevMonth),
+          }
         }
       })
     }
@@ -102,7 +113,7 @@ export async function fetchChainData(): Promise<ChainWithMetrics[]> {
   stablecoins.forEach(coin => {
     const chainCirculating = coin.chainCirculating || {}
     Object.entries(chainCirculating).forEach(([chain, data]) => {
-      const current = data.current?.peggedUSD || 0
+      const current = getCirculatingValue(data.current)
       if (current > 0) {
         const existing = chainMap.get(chain) || {
           total: 0,
@@ -112,8 +123,8 @@ export async function fetchChainData(): Promise<ChainWithMetrics[]> {
         }
 
         existing.total += current
-        existing.prevDay += data.circulatingPrevDay?.peggedUSD || current
-        existing.prevWeek += data.circulatingPrevWeek?.peggedUSD || current
+        existing.prevDay += getCirculatingValue(data.circulatingPrevDay) || current
+        existing.prevWeek += getCirculatingValue(data.circulatingPrevWeek) || current
         existing.stablecoins.push({
           name: coin.name,
           symbol: coin.symbol,
