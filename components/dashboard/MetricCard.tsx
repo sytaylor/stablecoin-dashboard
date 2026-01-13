@@ -1,8 +1,13 @@
 'use client'
 
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Info } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils/cn'
 import { formatCurrency, formatNumber, formatPercentage } from '@/lib/utils/format'
 
@@ -15,6 +20,7 @@ interface MetricCardProps {
   icon?: React.ReactNode
   loading?: boolean
   subtitle?: string
+  tooltip?: string
 }
 
 export function MetricCard({
@@ -26,6 +32,7 @@ export function MetricCard({
   icon,
   loading = false,
   subtitle,
+  tooltip,
 }: MetricCardProps) {
   const formatValue = (val: number) => {
     switch (format) {
@@ -90,9 +97,19 @@ export function MetricCard({
             <span className="text-muted-foreground ml-1">{changeLabel}</span>
           </div>
         )}
-        {subtitle && (
-          <div className="text-xs text-muted-foreground mt-1">
-            {subtitle}
+        {(subtitle || tooltip) && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+            {subtitle && <span>{subtitle}</span>}
+            {tooltip && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3 w-3 cursor-help hover:text-foreground transition-colors" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs text-xs">
+                  <p>{tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         )}
       </CardContent>

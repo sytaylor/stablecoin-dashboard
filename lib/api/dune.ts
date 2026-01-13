@@ -234,29 +234,38 @@ export async function fetchTopHolders(
 
 // ============================================
 // MOCK DATA (Replace with real Dune queries)
+// Deterministic values based on date to avoid variability
 // ============================================
+
+// Simple seeded random for consistent mock data
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
 
 function getMockMintBurnData(stablecoin?: string, days = 30): MintBurnEvent[] {
   const events: MintBurnEvent[] = []
   const stables = stablecoin ? [stablecoin] : ['USDT', 'USDC', 'DAI', 'USDS']
+  const chains = ['Ethereum', 'Tron', 'BSC', 'Solana']
 
   for (let i = 0; i < days; i++) {
     const date = new Date()
     date.setDate(date.getDate() - i)
+    const daySeed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
 
-    stables.forEach(stable => {
-      // Random mint/burn events
-      if (Math.random() > 0.3) {
-        const isMint = Math.random() > 0.4
-        const amount = Math.floor(Math.random() * 500000000) + 10000000
+    stables.forEach((stable, stableIdx) => {
+      const seed = daySeed + stableIdx * 1000
+      if (seededRandom(seed) > 0.3) {
+        const isMint = seededRandom(seed + 1) > 0.4
+        const amount = Math.floor(seededRandom(seed + 2) * 500000000) + 10000000
         events.push({
           timestamp: date.toISOString(),
           stablecoin: stable,
           type: isMint ? 'mint' : 'burn',
           amount,
           amountUsd: amount,
-          chain: ['Ethereum', 'Tron', 'BSC', 'Solana'][Math.floor(Math.random() * 4)],
-          txHash: `0x${Math.random().toString(16).slice(2)}`,
+          chain: chains[Math.floor(seededRandom(seed + 3) * 4)],
+          txHash: `0x${seed.toString(16).padStart(64, '0')}`,
           issuer: stable === 'USDT' ? 'Tether Treasury' : stable === 'USDC' ? 'Circle' : undefined,
         })
       }
@@ -324,10 +333,14 @@ function getMockTransferVolumeData(stablecoin?: string, days = 30): TransferVolu
   for (let i = 0; i < days; i++) {
     const date = new Date()
     date.setDate(date.getDate() - i)
+    const daySeed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
 
-    stables.forEach(stable => {
+    stables.forEach((stable, stableIdx) => {
+      // Base volumes: USDT ~$50B, USDC ~$30B, DAI ~$2B daily
       const baseVolume = stable === 'USDT' ? 50000000000 : stable === 'USDC' ? 30000000000 : 2000000000
-      const volume = Math.floor(baseVolume * (0.7 + Math.random() * 0.6))
+      const seed = daySeed + stableIdx * 100
+      // Use seeded random for consistent values (±30% variance)
+      const volume = Math.floor(baseVolume * (0.7 + seededRandom(seed) * 0.6))
       const txCount = Math.floor(volume / 50000)
 
       data.push({

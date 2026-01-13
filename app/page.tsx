@@ -132,6 +132,7 @@ export default function DashboardPage() {
           icon={<CreditCard className="h-5 w-5" />}
           loading={volumeLoading || duneLoading || bridgeLoading || adjustedLoading}
           subtitle="Excl. CEX, DEX & bridges"
+          tooltip="Methodology: Excludes CEX deposits/withdrawals (Binance, Coinbase, etc.), DEX router activity (Uniswap, Curve), bridge transfers, and high-frequency addresses (>1000 tx/30d). Based on Visa/Allium & Artemis research showing ~38% of raw volume is actual payments."
         />
         <MetricCard
           title="Daily Active Addresses"
