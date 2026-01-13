@@ -87,3 +87,10 @@ export function formatTxHash(hash: string, chars = 6): string {
   if (!hash || hash.length < chars * 2) return hash
   return `${hash.slice(0, chars)}...${hash.slice(-chars)}`
 }
+
+// Alias for formatCurrency for compact display
+export const formatCompact = formatCurrency
+
+export function formatPercent(value: number, decimals = 2): string {
+  return `${value.toFixed(decimals)}%`
+}

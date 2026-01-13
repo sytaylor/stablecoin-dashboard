@@ -4,10 +4,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
-  Coins,
-  Link2,
+  TrendingUp,
+  Activity,
   GitBranch,
-  Settings,
+  Shield,
+  Fish,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -23,10 +24,12 @@ import {
 } from '@/components/ui/select'
 
 const navigation = [
-  { name: 'Overview', href: '/', icon: LayoutDashboard },
-  { name: 'Stablecoins', href: '/stablecoins', icon: Coins },
-  { name: 'Chains', href: '/chains', icon: Link2 },
-  { name: 'Bridges', href: '/bridges', icon: GitBranch },
+  { name: 'Overview', href: '/', icon: LayoutDashboard, description: 'Executive summary' },
+  { name: 'Market', href: '/stablecoins', icon: TrendingUp, description: 'Supply & dominance' },
+  { name: 'Activity', href: '/activity', icon: Activity, description: 'Volume & addresses' },
+  { name: 'Flows', href: '/bridges', icon: GitBranch, description: 'Cross-chain bridges' },
+  { name: 'Risk', href: '/risk', icon: Shield, description: 'Peg & concentration' },
+  { name: 'Whale Watch', href: '/whales', icon: Fish, description: 'Large transfers' },
 ]
 
 export function Sidebar() {
@@ -114,8 +117,8 @@ export function Sidebar() {
           {/* Footer */}
           <div className="border-t p-4">
             <div className="text-xs text-muted-foreground">
-              <p>Data from DefiLlama</p>
-              <p className="mt-1">Updates every 30s</p>
+              <p>Data from DefiLlama + Dune</p>
+              <p className="mt-1">Updates every 5 min</p>
             </div>
           </div>
         </div>
