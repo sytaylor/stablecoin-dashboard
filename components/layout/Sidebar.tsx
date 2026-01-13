@@ -114,9 +114,17 @@ export function Sidebar() {
 
           {/* Footer */}
           <div className="border-t p-4">
-            <div className="text-xs text-muted-foreground">
-              <p>Data from DefiLlama + Dune</p>
-              <p className="mt-1">Updates every 5 min</p>
+            <div className="text-xs text-muted-foreground space-y-2">
+              <p>Data: DefiLlama • Dune • Artemis</p>
+              <p>Updates every 5 min</p>
+              <a
+                href="https://www.tokenizedpod.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block mt-3 text-primary hover:underline"
+              >
+                tokenizedpod.com
+              </a>
             </div>
           </div>
         </div>

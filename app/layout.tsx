@@ -8,25 +8,26 @@ import { Sidebar } from '@/components/layout/Sidebar'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'StableScan - Stablecoin Analytics Dashboard',
+  title: 'Tokenized - Stablecoin Analytics',
   description:
-    'Real-time stablecoin market data, cross-chain bridge flows, and analytics. Track USDT, USDC, DAI and 80+ stablecoins across 50+ blockchains.',
+    'Real-time stablecoin market intelligence. Track payments volume, bridge flows, and on-chain activity across 80+ stablecoins and 50+ blockchains.',
   keywords: [
     'stablecoin',
     'USDT',
     'USDC',
-    'DAI',
+    'payments',
+    'tokenization',
+    'RWA',
     'crypto',
     'blockchain',
     'DeFi',
     'bridge',
-    'cross-chain',
     'analytics',
   ],
   openGraph: {
-    title: 'StableScan - Stablecoin Analytics Dashboard',
+    title: 'Tokenized - Stablecoin Analytics',
     description:
-      'Real-time stablecoin market data, cross-chain bridge flows, and analytics.',
+      'Real-time stablecoin market intelligence from the Tokenized podcast team.',
     type: 'website',
   },
 }

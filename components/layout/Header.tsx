@@ -1,18 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
-import { Moon, Sun, Menu, RefreshCw } from 'lucide-react'
+import { Menu, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDashboardStore } from '@/stores/dashboard'
 import { formatRelativeTime } from '@/lib/utils/format'
 
 export function Header() {
-  const { theme, setTheme } = useTheme()
   const { sidebarOpen, setSidebarOpen, lastUpdated } = useDashboardStore()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4 md:px-6">
         <Button
           variant="ghost"
@@ -24,16 +22,22 @@ export function Header() {
           <span className="sr-only">Toggle sidebar</span>
         </Button>
 
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-            S
+        <Link href="/" className="flex items-center space-x-3">
+          {/* Tokenized logo - gradient circle */}
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#5189F1] to-[#C54AD8]">
+            <span className="text-white font-bold text-sm">T</span>
           </div>
-          <span className="font-bold text-lg hidden sm:inline-block">
-            StableScan
-          </span>
+          <div className="hidden sm:flex flex-col">
+            <span className="font-bold text-lg gradient-text leading-tight">
+              Tokenized
+            </span>
+            <span className="text-[10px] text-muted-foreground -mt-1">
+              Stablecoin Analytics
+            </span>
+          </div>
         </Link>
 
-        <nav className="ml-8 hidden md:flex items-center space-x-6">
+        <nav className="ml-8 hidden lg:flex items-center space-x-6">
           <Link
             href="/"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -47,10 +51,10 @@ export function Header() {
             Stablecoins
           </Link>
           <Link
-            href="/chains"
+            href="/activity"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Chains
+            Activity
           </Link>
           <Link
             href="/bridges"
@@ -60,25 +64,25 @@ export function Header() {
           </Link>
         </nav>
 
-        <div className="ml-auto flex items-center space-x-2">
+        <div className="ml-auto flex items-center space-x-4">
           {lastUpdated && (
-            <div className="hidden sm:flex items-center text-xs text-muted-foreground mr-4">
-              <RefreshCw className="h-3 w-3 mr-1 animate-spin-slow" />
+            <div className="hidden sm:flex items-center text-xs text-muted-foreground">
+              <RefreshCw className="h-3 w-3 mr-1.5" />
               <span className="live-indicator">
                 Updated {formatRelativeTime(lastUpdated)}
               </span>
             </div>
           )}
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          {/* Podcast link */}
+          <a
+            href="https://www.tokenizedpod.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-colors"
           >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+            Listen to Podcast
+          </a>
         </div>
       </div>
     </header>

@@ -107,3 +107,28 @@ export function useDuneMetricsSummary() {
     refetchInterval: 5 * 60 * 1000,
   })
 }
+
+// Adjusted Volume with filtering (Visa/Allium + Artemis methodology)
+export interface AdjustedVolumeData {
+  rawVolume: number
+  adjustedVolume: number
+  paymentsVolume: number
+  breakdown: {
+    category: string
+    volume: number
+    percentage: number
+  }[]
+  methodology: string
+  lastUpdated: string
+}
+
+export function useAdjustedVolume(rawVolume: number) {
+  return useQuery({
+    queryKey: ['adjustedVolume', rawVolume],
+    queryFn: () => fetchFromApi<AdjustedVolumeData>(
+      `/api/adjusted-volume?rawVolume=${rawVolume}`
+    ),
+    staleTime: 5 * 60 * 1000,
+    enabled: rawVolume > 0,
+  })
+}

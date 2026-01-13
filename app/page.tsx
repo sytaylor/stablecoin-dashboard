@@ -23,7 +23,7 @@ import { MetricCard, MetricCardGrid } from '@/components/dashboard/MetricCard'
 import { ChainDistribution } from '@/components/dashboard/ChainDistribution'
 import { useStablecoins, useTotalMetrics, useChains } from '@/lib/hooks/useStablecoins'
 import { useBridgeMetrics } from '@/lib/hooks/useBridges'
-import { useDuneMetricsSummary, usePegStability, useTransferVolume } from '@/lib/hooks/useDuneData'
+import { useDuneMetricsSummary, usePegStability, useTransferVolume, useAdjustedVolume } from '@/lib/hooks/useDuneData'
 import { useDashboardStore } from '@/stores/dashboard'
 import { formatCompact } from '@/lib/utils/format'
 
@@ -58,22 +58,26 @@ export default function DashboardPage() {
     }
   })
 
-  // Calculate volumes
+  // Calculate raw transfer volume
   const totalTransferVolume = volumeData?.reduce((sum, v) => sum + v.volume, 0) ||
     duneMetrics?.totalDailyVolume ||
     bridgeMetrics?.totalDailyVolume || 0
 
-  // Adjusted payments volume (filters out bots/MEV - typically ~35% of raw volume)
-  // This would come from Dune in production with proper filtering
-  const adjustedPaymentsVolume = totalTransferVolume * 0.35
+  // Get adjusted volume using Visa/Allium + Artemis methodology
+  const { data: adjustedData, isLoading: adjustedLoading } = useAdjustedVolume(totalTransferVolume)
+
+  // Payments volume: excludes CEX, DEX, bridges (Visa/Allium + Artemis methodology)
+  const paymentsVolume = adjustedData?.paymentsVolume || totalTransferVolume * 0.38
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Executive Overview</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          <span className="gradient-text">Stablecoin</span> Analytics
+        </h1>
         <p className="text-muted-foreground">
-          Real-time stablecoin market intelligence
+          Real-time market intelligence for payments & tokenization
         </p>
       </div>
 
@@ -122,12 +126,12 @@ export default function DashboardPage() {
           loading={volumeLoading || duneLoading || bridgeLoading}
         />
         <MetricCard
-          title="Adjusted Payments Volume"
-          value={adjustedPaymentsVolume}
+          title="Payments Volume"
+          value={paymentsVolume}
           format="currency"
           icon={<CreditCard className="h-5 w-5" />}
-          loading={volumeLoading || duneLoading || bridgeLoading}
-          subtitle="Excludes bots & MEV"
+          loading={volumeLoading || duneLoading || bridgeLoading || adjustedLoading}
+          subtitle="Excl. CEX, DEX & bridges"
         />
         <MetricCard
           title="Daily Active Addresses"
