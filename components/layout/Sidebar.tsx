@@ -8,7 +8,6 @@ import {
   Activity,
   GitBranch,
   Shield,
-  Fish,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -29,7 +28,6 @@ const navigation = [
   { name: 'Activity', href: '/activity', icon: Activity, description: 'Volume & addresses' },
   { name: 'Bridge Activity', href: '/bridges', icon: GitBranch, description: 'Cross-chain flows' },
   { name: 'Risk', href: '/risk', icon: Shield, description: 'Peg & concentration' },
-  { name: 'Whale Watch', href: '/whales', icon: Fish, description: 'Large transfers' },
 ]
 
 export function Sidebar() {

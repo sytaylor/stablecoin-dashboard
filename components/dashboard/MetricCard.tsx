@@ -14,6 +14,7 @@ interface MetricCardProps {
   format?: 'currency' | 'number' | 'percentage'
   icon?: React.ReactNode
   loading?: boolean
+  subtitle?: string
 }
 
 export function MetricCard({
@@ -24,6 +25,7 @@ export function MetricCard({
   format = 'currency',
   icon,
   loading = false,
+  subtitle,
 }: MetricCardProps) {
   const formatValue = (val: number) => {
     switch (format) {
@@ -86,6 +88,11 @@ export function MetricCard({
             {getChangeIcon(change)}
             <span>{formatPercentage(change)}</span>
             <span className="text-muted-foreground ml-1">{changeLabel}</span>
+          </div>
+        )}
+        {subtitle && (
+          <div className="text-xs text-muted-foreground mt-1">
+            {subtitle}
           </div>
         )}
       </CardContent>
