@@ -402,44 +402,13 @@ export interface AdjustedVolumeMetrics {
   lastUpdated: string
 }
 
-// Calculate adjusted volume - uses Artemis if available, otherwise estimates
+// Calculate adjusted volume using estimation methodology
+// NOTE: Artemis labeled wallet data (ARTEMIS_STABLECOIN_TRANSFER_VOLUME, P2P_STABLECOIN_TRANSFER_VOLUME)
+// is NOT available via REST API - requires Snowflake data share access
+// Using research-based estimation methodology instead
 export async function calculateAdjustedVolume(rawVolume: number): Promise<AdjustedVolumeMetrics> {
-  const apiKey = process.env.ARTEMIS_API_KEY
-
-  if (apiKey) {
-    try {
-      const artemisData = await fetchArtemisVolumeBreakdown(1)
-
-      // Scale to match our raw volume (in case of data timing differences)
-      const scale = rawVolume / artemisData.rawVolume
-
-      const adjustedVolume = artemisData.adjustedVolume * scale
-      const p2pVolume = artemisData.p2pVolume * scale
-      const paymentsVolume = artemisData.paymentsVolume * scale
-      const cexVolume = artemisData.cexVolume * scale
-      const defiVolume = artemisData.defiVolume * scale
-
-      return {
-        rawVolume,
-        adjustedVolume,
-        paymentsVolume,
-        p2pVolume,
-        breakdown: [
-          { category: 'CEX Activity', volume: cexVolume, percentage: (cexVolume / rawVolume) * 100 },
-          { category: 'DeFi/DEX', volume: defiVolume, percentage: (defiVolume / rawVolume) * 100 },
-          { category: 'P2P Transfers', volume: p2pVolume, percentage: (p2pVolume / rawVolume) * 100 },
-          { category: 'B2B Payments', volume: paymentsVolume - p2pVolume, percentage: ((paymentsVolume - p2pVolume) / rawVolume) * 100 },
-        ],
-        source: 'artemis',
-        methodology: 'Artemis labeled wallet methodology via Snowflake: ARTEMIS_STABLECOIN_TRANSFER_VOLUME excludes CEX internal transfers, DEX activity, and MEV bots. P2P_STABLECOIN_TRANSFER_VOLUME tracks EOA-to-EOA transfers only. Payments = P2P + estimated B2B activity.',
-        lastUpdated: new Date().toISOString(),
-      }
-    } catch (error) {
-      console.error('Artemis API error, falling back to estimates:', error)
-    }
-  }
-
-  // Fallback to estimates (Visa/Allium + Artemis research percentages)
+  // Always use estimation methodology since Snowflake metrics aren't available via REST API
+  // See PAYMENTS_VOLUME_METHODOLOGY.md for detailed explanation
   return getEstimatedVolumeBreakdown(rawVolume)
 }
 
