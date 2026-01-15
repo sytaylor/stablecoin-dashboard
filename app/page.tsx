@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MetricCard, MetricCardGrid } from '@/components/dashboard/MetricCard'
 import { ChainDistribution } from '@/components/dashboard/ChainDistribution'
+import { UserAdoptionCard } from '@/components/dashboard/UserAdoptionCard'
 import { useStablecoins, useTotalMetrics, useChains } from '@/lib/hooks/useStablecoins'
 import { useBridgeMetrics } from '@/lib/hooks/useBridges'
 import { useDuneMetricsSummary, usePegStability, useTransferVolume, useAdjustedVolume } from '@/lib/hooks/useDuneData'
@@ -229,6 +230,9 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* User Adoption - Unique insight from Artemis */}
+      <UserAdoptionCard symbols={['usdc', 'usdt', 'dai']} days={30} />
 
       {/* Quick Links */}
       <div className="grid gap-4 md:grid-cols-3">

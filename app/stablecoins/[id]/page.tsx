@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { MetricCard, MetricCardGrid } from '@/components/dashboard/MetricCard'
 import { MarketCapChart } from '@/components/charts/MarketCapChart'
 import { DonutChart } from '@/components/charts/PieChart'
+import { StablecoinHealthScore } from '@/components/dashboard/StablecoinHealthScore'
 import { cn } from '@/lib/utils/cn'
 import { formatCurrency, formatPercentage } from '@/lib/utils/format'
 import { getStablecoinColor, getChainColor } from '@/lib/utils/colors'
@@ -147,6 +148,9 @@ export default function StablecoinDetailPage({ params }: PageProps) {
           />
         </div>
       </div>
+
+      {/* User Adoption Health - Unique Artemis insight */}
+      <StablecoinHealthScore symbol={stablecoin.symbol.toLowerCase()} />
 
       {/* Chain Breakdown */}
       <Card>
