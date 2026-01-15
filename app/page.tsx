@@ -135,15 +135,15 @@ export default function DashboardPage() {
           tooltip="Total stablecoin transfer volume in the last 24 hours. Includes all on-chain activity: CEX flows, DEX trades, bridges, payments, and bot activity. This is the 'unadjusted' figure."
         />
         <MetricCard
-          title="Payments Volume"
+          title={volumeSource === 'artemis' ? '24h Payments Volume' : '24h Payments Volume (Est.)'}
           value={paymentsVolume}
           format="currency"
           icon={<CreditCard className="h-5 w-5" />}
           loading={volumeLoading || duneLoading || bridgeLoading || adjustedLoading}
-          subtitle={`~${paymentsPercentage}% of raw${volumeSource === 'artemis' ? '' : ' (est.)'}`}
+          subtitle={`~${paymentsPercentage}% of raw volume`}
           tooltip={volumeSource === 'artemis'
-            ? "Artemis labeled wallet data: excludes CEX internal transfers, DEX activity, MEV bots. P2P + B2B transfers classified as payments."
-            : "Estimated based on Visa/Allium & Artemis 2025 research. Add ARTEMIS_API_KEY for real labeled data. Actual % varies by chain and stablecoin."
+            ? "Real Artemis labeled wallet data: excludes CEX internal transfers, DEX activity, MEV bots. P2P + B2B transfers classified as payments. Last 24 hours."
+            : "Estimated using Visa/Allium & Artemis 2025 research methodology: ~38% of raw on-chain volume is real payments (P2P + B2B), excluding CEX/DEX/bridge activity. Artemis Snowflake metrics not available via REST API. Last 24 hours."
           }
         />
         <MetricCard

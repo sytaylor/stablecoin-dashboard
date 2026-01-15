@@ -1,6 +1,9 @@
 // Artemis API client for stablecoin user adoption metrics
-// Uses official Artemis Python SDK approach: https://pypi.org/project/artemis/
-// Available metrics: DAU, DAILY_TXNS, STABLECOIN_MC, PRICE
+// Uses official Artemis REST API: https://api.artemisxyz.com
+// Available via REST: DAU, DAILY_TXNS, STABLECOIN_MC, PRICE
+// NOT available via REST: ARTEMIS_STABLECOIN_TRANSFER_VOLUME, P2P_STABLECOIN_TRANSFER_VOLUME
+//   (These require Snowflake data share access, not available through API)
+// For payments volume: Using Visa/Allium & Artemis 2025 research methodology (38% estimate)
 // Free tier: 100,000 API calls/month
 
 const ARTEMIS_API_BASE = 'https://api.artemisxyz.com'
@@ -428,7 +431,7 @@ export async function calculateAdjustedVolume(rawVolume: number): Promise<Adjust
           { category: 'B2B Payments', volume: paymentsVolume - p2pVolume, percentage: ((paymentsVolume - p2pVolume) / rawVolume) * 100 },
         ],
         source: 'artemis',
-        methodology: 'Artemis labeled wallet data: ARTEMIS_STABLECOIN_TRANSFER_VOLUME excludes CEX internal transfers and MEV. P2P_STABLECOIN_TRANSFER_VOLUME tracks EOA-to-EOA transfers.',
+        methodology: 'Artemis labeled wallet methodology via Snowflake: ARTEMIS_STABLECOIN_TRANSFER_VOLUME excludes CEX internal transfers, DEX activity, and MEV bots. P2P_STABLECOIN_TRANSFER_VOLUME tracks EOA-to-EOA transfers only. Payments = P2P + estimated B2B activity.',
         lastUpdated: new Date().toISOString(),
       }
     } catch (error) {
@@ -440,27 +443,29 @@ export async function calculateAdjustedVolume(rawVolume: number): Promise<Adjust
   return getEstimatedVolumeBreakdown(rawVolume)
 }
 
-// Estimated breakdown when Artemis API is not available
+// Estimated breakdown when Artemis labeled wallet data is not available
 function getEstimatedVolumeBreakdown(rawVolume: number): AdjustedVolumeMetrics {
-  // Based on Artemis 2025 report and Visa/Allium research
+  // Based on Artemis 2025 Stablecoin Payments Report and Visa/Allium research
+  // Methodology: Analyze raw on-chain volume and exclude non-payment activity
+  // Reference: "Stablecoin Payments from the Ground Up 2025" by Artemis
   const breakdown = [
-    { category: 'CEX Activity', volume: rawVolume * 0.28, percentage: 28 },
-    { category: 'DeFi/DEX', volume: rawVolume * 0.22, percentage: 22 },
-    { category: 'Bridges', volume: rawVolume * 0.08, percentage: 8 },
-    { category: 'B2B Payments', volume: rawVolume * 0.18, percentage: 18 },
-    { category: 'P2P Transfers', volume: rawVolume * 0.10, percentage: 10 },
-    { category: 'P2B/B2P', volume: rawVolume * 0.10, percentage: 10 },
-    { category: 'Other/Unknown', volume: rawVolume * 0.04, percentage: 4 },
+    { category: 'CEX Activity', volume: rawVolume * 0.28, percentage: 28 },      // Exchange internal transfers
+    { category: 'DeFi/DEX', volume: rawVolume * 0.22, percentage: 22 },          // DEX trading, liquidity provision
+    { category: 'Bridges', volume: rawVolume * 0.08, percentage: 8 },            // Cross-chain bridge transfers
+    { category: 'B2B Payments', volume: rawVolume * 0.18, percentage: 18 },      // Business-to-business transfers
+    { category: 'P2P Transfers', volume: rawVolume * 0.10, percentage: 10 },     // Peer-to-peer EOA transfers
+    { category: 'P2B/B2P', volume: rawVolume * 0.10, percentage: 10 },           // Consumer-business payments
+    { category: 'Other/Unknown', volume: rawVolume * 0.04, percentage: 4 },      // MEV, bots, unclassified
   ]
 
   return {
     rawVolume,
-    adjustedVolume: rawVolume * 0.42,
-    paymentsVolume: rawVolume * 0.38,
-    p2pVolume: rawVolume * 0.10,
+    adjustedVolume: rawVolume * 0.42,     // Excludes CEX/DEX/bridges = 42% of raw
+    paymentsVolume: rawVolume * 0.38,     // P2P + B2B + P2B = 38% of raw (real payments)
+    p2pVolume: rawVolume * 0.10,          // Peer-to-peer only = 10% of raw
     breakdown,
     source: 'estimated',
-    methodology: 'Estimated based on Visa/Allium & Artemis 2025 research. Add ARTEMIS_API_KEY for real labeled data.',
+    methodology: 'Estimated using Visa/Allium & Artemis 2025 methodology. ~38% of raw on-chain volume is real payments (P2P + B2B). Note: Artemis labeled wallet data (via Snowflake) not available through REST API.',
     lastUpdated: new Date().toISOString(),
   }
 }
