@@ -16,13 +16,14 @@ import type { StablecoinWithMetrics } from '@/lib/types'
 
 type SortField = 'totalCirculating' | 'change24h' | 'change7d' | 'change30d' | 'dominance'
 type SortOrder = 'asc' | 'desc'
+type SegmentFilter = 'all' | 'usd-fiat' | 'non-usd-fiat' | 'collateral-yield'
 
 export default function StablecoinsPage() {
   const { data: stablecoins, isLoading } = useStablecoins()
   const [sortField, setSortField] = useState<SortField>('totalCirculating')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [search, setSearch] = useState('')
-  const [pegFilter, setPegFilter] = useState<string>('all')
+  const [segmentFilter, setSegmentFilter] = useState<SegmentFilter>('all')
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -38,16 +39,26 @@ export default function StablecoinsPage() {
       const matchesSearch =
         coin.name.toLowerCase().includes(search.toLowerCase()) ||
         coin.symbol.toLowerCase().includes(search.toLowerCase())
-      const matchesPeg = pegFilter === 'all' || coin.pegType === pegFilter
-      return matchesSearch && matchesPeg
+
+      // Filter by market segment (aligned with homepage cards)
+      let matchesSegment = true
+      if (segmentFilter === 'usd-fiat') {
+        // USD 1:1 Fiat-Backed
+        matchesSegment = coin.pegType === 'peggedUSD' && coin.pegMechanism === 'fiat-backed'
+      } else if (segmentFilter === 'non-usd-fiat') {
+        // Non-USD Fiat stablecoins
+        matchesSegment = ['peggedEUR', 'peggedGBP', 'peggedJPY', 'peggedCHF', 'peggedAUD', 'peggedCAD', 'peggedSGD', 'peggedCNY', 'peggedREAL', 'peggedMXN', 'peggedARS', 'peggedPHP', 'peggedRUB', 'peggedTRY', 'peggedUAH'].includes(coin.pegType)
+      } else if (segmentFilter === 'collateral-yield') {
+        // Collateral & Yield-Bearing
+        matchesSegment = coin.pegType === 'peggedUSD' && (coin.pegMechanism === 'crypto-backed' || coin.pegMechanism === 'algorithmic')
+      }
+
+      return matchesSearch && matchesSegment
     })
     .sort((a, b) => {
       const multiplier = sortOrder === 'asc' ? 1 : -1
       return (a[sortField] - b[sortField]) * multiplier
     })
-
-  // Get unique peg types
-  const pegTypes = Array.from(new Set((stablecoins || []).map((c) => c.pegType)))
 
   return (
     <div className="space-y-6">
@@ -70,12 +81,12 @@ export default function StablecoinsPage() {
             className="w-full pl-10 pr-4 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
-        <Tabs value={pegFilter} onValueChange={setPegFilter}>
+        <Tabs value={segmentFilter} onValueChange={(value) => setSegmentFilter(value as SegmentFilter)}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="peggedUSD">USD</TabsTrigger>
-            <TabsTrigger value="peggedEUR">EUR</TabsTrigger>
-            <TabsTrigger value="peggedVAR">Yield</TabsTrigger>
+            <TabsTrigger value="usd-fiat">USD Fiat-Backed</TabsTrigger>
+            <TabsTrigger value="non-usd-fiat">Non-USD Fiat</TabsTrigger>
+            <TabsTrigger value="collateral-yield">Collateral & Yield</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
